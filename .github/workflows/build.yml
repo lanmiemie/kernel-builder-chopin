@@ -15,7 +15,7 @@ jobs:
       builddate: ${{ steps.generate-builddate.outputs.builddate }}
     steps:
       - name: "😄 Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: "😆 Generate Matrix"
         id: generate-matrix
@@ -29,7 +29,7 @@ jobs:
 
   Build-Kernel:
     name: "🐎 Build kernel"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - Set-repos
     strategy:
@@ -54,12 +54,27 @@ jobs:
       useAnykernel: ${{ matrix.repos.AnyKernel3.use }}
       release: ${{ matrix.repos.AnyKernel3.release }}
     steps:
-      - name: "⭐ Install prerequisites"
+          # Set swap space
+      - name: 📐 Set swap to 10G
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
+
+      # This action checks-out your CONFIGSitory under $GITHUB_WORKSPACE, so your workflow can access it.
+      - name: 😄 Checkout
+        uses: actions/checkout@v4
+
+      # Install prerequisites for Ubuntu
+      - name: ⭐ Install prerequisites
         run: |
           sudo apt-get update
+          sudo apt-get install -y curl git ftp lftp wget libarchive-tools ccache python2 python2-dev python3
+          sudo apt-get install -y pngcrush schedtool dpkg-dev liblz4-tool make optipng maven device-tree-compiler 
+          sudo apt-get install -y libc6-dev-i386 lib32ncurses5-dev libx11-dev lib32z-dev libgl1-mesa-dev xsltproc
+          sudo apt-get install -y libxml2-utils libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools lzop flex tree
           sudo apt-get install -y build-essential bc gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi libssl-dev libfl-dev
-          sudo apt-get install -y curl git ftp lftp wget libarchive-tools ccache python2 python2-dev
-          sudo apt-get install -y zip unzip tar gzip bzip2 rar unrar
+          sudo apt-get install -y pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl 
+          sudo apt-get install -y zip unzip tar gzip bzip2 rar unrar llvm g++-multilib bison gperf zlib1g-dev automake
 
       - name: "🚄 Create cache key from `repos`"
         if: ${{ env.ccache == 'true' }}
@@ -246,7 +261,7 @@ jobs:
           make ${{ env.args }}
 
       - name: "💛 Upload Image"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
         with:
@@ -266,7 +281,7 @@ jobs:
           retention-days: 7
 
       - name: "💜 Upload dtb"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
         with:
@@ -276,7 +291,7 @@ jobs:
           retention-days: 7
 
       - name: "❤️ Upload dtbo.img"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
         with:
@@ -310,7 +325,7 @@ jobs:
           zip -q -r "${{ env.anykernel }}.zip" *
 
       - name: "💾 Upload AnyKernel3 image => (${{ env.builddate }})"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ env.useAnykernel == 'true' }}
         with:
           name: "${{ env.KERNEL_DEVICE }}-${{ env.KERNEL_NAME }}_${{ env.builddate }}"
