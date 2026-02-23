@@ -34,7 +34,6 @@ jobs:
       - Set-repos
     strategy:
       max-parallel: 4
-      fail-fast: false
       matrix:
         repos: ${{ fromJSON(needs.Set-repos.outputs.repos) }}
     env:
@@ -59,7 +58,6 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 10
-
       # This action checks-out your CONFIGSitory under $GITHUB_WORKSPACE, so your workflow can access it.
       - name: 😄 Checkout
         uses: actions/checkout@v4
@@ -269,6 +267,10 @@ jobs:
           path: ${{ env.OUT_DIR }}/arch/${{ env.arch }}/boot/Image
           if-no-files-found: ignore
           retention-days: 7
+
+      - name: 😄 Checkout
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
 
       - name: "💙 Upload Image.gz"
         uses: actions/upload-artifact@v4
