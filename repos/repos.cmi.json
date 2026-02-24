@@ -5,7 +5,7 @@
       "repo": "https://github.com/AOSP-13-Mediatek/android_kernel_xiaomi_chopin",
       "branch": "U",
       "device": "chopin",
-      "defconfig": "chopin_user_defconfig"
+      "defconfig": "defconfig"
     },
     "withKernelSU": true,
     "toolchains": [
